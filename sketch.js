@@ -18,16 +18,17 @@ function setup() {
   //noLoop();
 }
 
-let i = 0;
+//let i = 0;
 function draw() {
-  background(220);
   //translate(0, 0, 200);
   //fill("red");
-  normalMaterial();
-  
-  if ( i<138.189685 ) {
-  rotateY(1);
-  i+=1;
-}
-  model(d20);
+
+  for (let i = 0; i < 138.189685; i += frameCount * 0.001) {
+    background(220);
+    push();
+    rotateY(frameCount * 0.001);
+    normalMaterial();
+    model(d20);
+    pop();
+  }
 }
