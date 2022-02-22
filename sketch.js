@@ -1,10 +1,15 @@
 let d12;
+let d20;
 function preload() {
-  //obtained from here: https://commons.wikimedia.org/wiki/File:Dodecahedron.stl
+  //obtained from here: 
+  //https://commons.wikimedia.org/wiki/File:Dodecahedron.stl
   d12 = loadModel(
-    "https://cdn.glitch.global/480fbbe9-66ac-4d90-a58e-7af20abfde25/Dodecahedron.stl?v=1645507143156",
+    "assets/Dodecahedron.stl",
     true
   );
+  //obtained from here: 
+  //https://commons.wikimedia.org/wiki/File:Regular_icosahedron.stl
+  d20 = loadModel("assets/Ico");
 }
 
 function setup() {
@@ -17,6 +22,6 @@ function draw() {
   //translate(0, 0, 200);
   fill("red");
   rotateX(frameCount * 0.01);
-  //rotateY(frameCount * 0.01);
-  model(d12);
+  rotateY(frameCount * 0.01);
+  //model(d12);
 }
