@@ -1,7 +1,7 @@
 //different settings for debugging
 const DEBUG = {
   //have d20 rotate so that all sides can be seen
-  ROT: false,
+  ROT: true,
   //log rot values to console
   ANGLELOG: false,
   //display x, y, and z axes
@@ -12,7 +12,7 @@ const DEBUG = {
 class dice {
   constructor(ANGLE) {
     this.model;
-    this.texture;
+    this.txtr;
     this.rotX = 0;
     this.rotY = 0;
     this.rotZ = 0;
@@ -37,12 +37,13 @@ function preload() {
   d20.model = loadModel("assets/Regular_icosahedron.stl", true);
   //obtained from here:
   //https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg
-  d20.texture = loadImage("");
+  d20.txtr = loadImage("assets/cat.jpg");
 }
 
 function setup() {
   //create canvas w/ webgl so that 3d can be used
   createCanvas(400, 400, WEBGL);
+  
 }
 
 function draw() {
@@ -97,7 +98,9 @@ if (DEBUG.AXIS){
 }
 
   //render d20 model
-  normalMaterial();
+  //normalMaterial();
+  textureWrap();
+  texture(d20.txtr);
   model(d20.model);
 
   pop();
