@@ -1,3 +1,11 @@
+//different settings for debugging
+const DEBUG = {
+  //have d20 rotate so that all sides can be seen
+  ROT: false,
+  ANGLELOG: false,
+  AXIS: false
+}
+
 //create a dice object template
 class dice {
   constructor(ANGLE) {
@@ -52,23 +60,21 @@ function draw() {
   rotateX((360 - d20.ANGLE) / 2);
   //rotate left by the dihedral angle to the left face
 
-  function keyPressed() {
-    if (keyCode == LEFT_ARROW) {
-      rotateY(d20.ANGLE);
-    }
-    console.log('keyPressed');
-  }
-
+  if (DEBUG.ROT){
   //rotate the d20
-  /*
   rotateX(d20.rotX);
   d20.rotX+=0.01;
   rotateY(d20.rotY);
   d20.rotY+=0.01;
   rotateZ(d20.rotZ);
   d20.rotZ+=0.01;
-  */
+  }
+  
+  if (DEBUG.ANGLELOG){
+    console.log(d20.rotX + ', ' + d20.rotY + ', ' + d20.rotZ);
+  }
 
+if (DEBUG.AXIS){
   //draw lines for axis
   push();
   strokeWeight(5);
@@ -86,6 +92,7 @@ function draw() {
   line(0, 0, 400, 0, 0, -400);
 
   pop();
+}
 
   //render d20 model
   normalMaterial();
