@@ -2,8 +2,10 @@
 const DEBUG = {
   //have d20 rotate so that all sides can be seen
   ROT: false,
+  //log rot values to console
   ANGLELOG: false,
-  AXIS: false
+  //display x, y, and z axes
+  AXIS: true
 }
 
 //create a dice object template
@@ -33,18 +35,14 @@ function preload() {
   //obtained from here:
   //https://commons.wikimedia.org/wiki/File:Regular_icosahedron.stl
   d20.model = loadModel("assets/Regular_icosahedron.stl", true);
+  //obtained from here:
+  //https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg
+  d20.texture = loadImage("");
 }
 
 function setup() {
   //create canvas w/ webgl so that 3d can be used
   createCanvas(400, 400, WEBGL);
-  //noLoop();
-}
-
-function smoothRotate(angle, speed) {
-  if (!speed) {
-    speed = 1;
-  }
 }
 
 function draw() {
@@ -52,30 +50,34 @@ function draw() {
   //fill("red");
 
   background(220);
-
+  
+  //change angle mode to degreese
+  angleMode(DEGREES);
+  
   //draw the d20
   push();
 
   //rotate down half of the exterior dihedral angle to the main face
-  rotateX((360 - d20.ANGLE) / 2);
+  rotateX((d20.ANGLE)/2);
   //rotate left by the dihedral angle to the left face
 
   if (DEBUG.ROT){
   //rotate the d20
   rotateX(d20.rotX);
-  d20.rotX+=0.01;
+  d20.rotX+=1;
   rotateY(d20.rotY);
-  d20.rotY+=0.01;
+  d20.rotY+=1;
   rotateZ(d20.rotZ);
-  d20.rotZ+=0.01;
+  d20.rotZ+=1;
   }
   
+  //log the rot angle measures to the console
   if (DEBUG.ANGLELOG){
     console.log(d20.rotX + ', ' + d20.rotY + ', ' + d20.rotZ);
   }
 
 if (DEBUG.AXIS){
-  //draw lines for axis
+  //draw lines for axes
   push();
   strokeWeight(5);
 
