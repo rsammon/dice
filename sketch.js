@@ -52,46 +52,25 @@ function setup() {
   //assign the verticies of the d20
   //verticies from here: https://en.wikipedia.org/wiki/Regular_icosahedron#Cartesian_coordinates
   d20.vrt = [
-    0,
-    1,
-    RATIO,
-    0,
-    -1,
-    RATIO,
-    0,
-    1,
-    -RATIO,
-    0,
-    -1,
-    -RATIO,
+    0,1,RATIO,
+    0,-1,RATIO,
+    0,1,-RATIO,
+    0,-1,-RATIO,
 
-    1,
-    RATIO,
-    0,
-    -1,
-    RATIO,
-    0,
-    1,
-    -RATIO,
-    0,
-    -1,
-    -RATIO,
-    0,
+    1,RATIO,0,
+    -1,RATIO,0,
+    1,-RATIO,0,
+    -1,-RATIO,0,
 
-    RATIO,
-    0,
-    1,
-    RATIO,
-    0,
-    -1,
-    -RATIO,
-    0,
-    1,
-    -RATIO,
-    0,
-    -1,
+    RATIO,0,1,
+    RATIO,0,-1,
+    -RATIO,0,1,
+    -RATIO,0,-1,
   ];
+  
 }
+
+let x = false;
 
 function draw() {
   //translate(0, 0, 200);
@@ -148,16 +127,18 @@ function draw() {
   //render the d20 with different triangles so that each one can display a different texture
   stroke("black");
   scale(100);
-  //normalMaterial();
-
-  let tries = [];
   
+  //sets the texture mode to normal so that 
+  textureMode(NORMAL);
+  
+  //initialize/reset the matrix for the 
+  let tries = [];
+   
   //for every vertex
   for (let i = 0; i < d20.vrt.length; i += 3) {
     
     //check if every vertex
     for (let test = 0; test < d20.vrt.length; test += 3) {
-      beginShape(TRIANGLE_STRIP);
       
       //has a vertex a distance of 2 away from itself
       if (
@@ -167,11 +148,9 @@ function draw() {
             pow(d20.vrt[i + 2] - d20.vrt[test + 2], 2)) ==
             2 ) {
         
-        
-          
-        
         //and has another vertex a distance of 2 away from itself
         for (let test2 = 0; test2 < d20.vrt.length; test2 += 3) {
+          
       if (
         sqrt(
           pow(d20.vrt[i] - d20.vrt[test2], 2) +
@@ -184,50 +163,62 @@ function draw() {
         let draw = true;
         //and that triangle hasn't already been drawn
         for (let check = 0; check < tries.length; check++){
-        if (tries[check]=i){
-        if ( 
-          (check % 3 == 0 &&
-            (tries[check + 1] == test ||
-              test2 ||
-              tries[check + 2] == test ||
-              test2)) ||
-          (check % 3 == 1 &&
-            (tries[check - 1] == test ||
-              test2 ||
-              tries[check + 1] == test ||
-              test2)) ||
-          (check % 3 == 2 &&
-            (tries[check - 2] == test ||
-              test2 ||
-              tries[check - 1] == test ||
-              test2))
-        ) {
+          
+        if (tries[check] == i){
+          
+        if (
+          //if the vertecies index value in the tries contains all 3 in the same place, then it will not draw triangle
+          //calculated using the check value minus the distance it is from the first vertex in the list plus however much it needs to move forward
+           ( tries[ check-(check%3)] == test && (tries[ check-(check%3) + 1] == test2 || tries[ check-(check%3) + 2]== test2) ) ||
+           ( tries[ check-(check%3) +1 ] == test && (tries[ check-(check%3)] == test2 || tries[ check-(check%3) + 2]== test2) ) ||
+           ( tries[ check-(check%3) +2 ] == test && (tries[ check-(check%3)] == test2 || tries[ check-(check%3) + 1]== test2) )
+          ) {
+          
+          
           draw = false;
-          console.log(draw);
           }
-
       }
         }
+        
           if (draw){
-          //if so, create a triangle that is a face of the icosahedron
-          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 0, 0);
-        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 1, 0);
-        vertex(d20.vrt[test2], d20.vrt[test2+1], d20.vrt[test2+2], 0.5, 1);
+          //if so, create a triangle that is a face of the icosahedron 
+          //(The last 2 coordinates are uv coordinates (which are necessary for textures))
+             texture(d20.txtr);
+          beginShape(TRIANGLE_STRIP);
+        
+            
+          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 1, 1);
+        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0.5, 0);
+        vertex(d20.vrt[test2], d20.vrt[test2+1], d20.vrt[test2+2], 0, 1);
+             
           tries.push(i);
           tries.push(test);
           tries.push(test2);
+            
+          endShape(CLOSE);
+           
+if (!x){
+    console.log('face drawn!');
+  //console.log('v1:' + i + ' v2:' + test + ' v3:' + test2);
+  //console.log(tries);
+  }         
           }
        
         }
         }
       
     }
-      endShape(CLOSE);
     }
       
     
   }
+  if (!x){
+    console.log(tries);
+  }
+  x = true;
 
   pop();
+  
+  //there for helping with debugging
   orbitControl();
 }
