@@ -5,16 +5,22 @@ const DEBUG = {
   //log rot values to console
   ANGLELOG: false,
   //display x, y, and z axes
-  AXIS: true,
+  AXIS: false,
+  //log details when drawing faces of d20
+  DRAWLOG: false,
+  //orbit mode and debug mode
+  //more info here: https://p5js.org/reference/#/p5/orbitControl
+  //and here: https://p5js.org/reference/#/p5/debugMode
+  ORBIT: true,
 };
 
 let RATIO;
 
 //create a dice object template
 class dice {
-  constructor(ANGLE) {
-    this.model;
-    this.txtr;
+  constructor(ANGLE, SIDES) {
+    this.txtr = [];
+    this.SIDES = SIDES;
     this.rotX = 0;
     this.rotY = 0;
     this.rotZ = 0;
@@ -25,29 +31,36 @@ class dice {
 
 //initialize dice variables
 let d12 = new dice(0);
-let d20 = new dice(138.189685);
+let d20 = new dice(138.189685, 20);
 
-//dihedral angle for the different dice
-const D20ANGLE = 138.189685;
 
 //load models for use
 function preload() {
-  //obtained from here:
-  //https://commons.wikimedia.org/wiki/File:Dodecahedron.stl
-  d12 = loadModel("assets/Dodecahedron.stl", true);
-  //obtained from here:
-  //https://commons.wikimedia.org/wiki/File:Regular_icosahedron.stl
-  d20.model = loadModel("assets/Regular_icosahedron.stl", true);
-
+  
   //obtained from here:
   //https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg
-  d20.txtr = loadImage("assets/cat.jpg");
+  //d20.txtr = loadImage("assets/cat.jpg");
 }
 
 function setup() {
   //create canvas w/ webgl so that 3d can be used
   createCanvas(500, 500, WEBGL);
   RATIO = (1 + sqrt(5)) / 2;
+  
+  //create different graphics for each side with different numbers
+  //some more information about this code
+  //https://p5js.org/reference/#/p5/createGraphics
+  for (let i = 0; i < d20.SIDES; i++){
+    push();
+    rectMode(CENTER);
+    d20.txtr[i]  = createGraphics(500, 500);
+    d20.txtr[i].background('#19809b');
+    d20.txtr[i].stroke('#9b3419');
+    d20.txtr[i].textSize(30);
+    d20.txtr[i].textFont("times-new-roman-bold-italic");
+    d20.txtr[i].text(i+1, d20.txtr[i].width/2, d20.txtr[i].height/2+40);
+    pop();
+  }
 
   //assign the verticies of the d20
   //verticies from here: https://en.wikipedia.org/wiki/Regular_icosahedron#Cartesian_coordinates
@@ -70,12 +83,18 @@ function setup() {
   
 }
 
-let x = false;
+//for logging things to the console without repeating every loop
+let log = false;
 
 function draw() {
   //translate(0, 0, 200);
   //fill("red");
 
+  
+  
+  
+  
+  
   background(230);
 
   //change angle mode to degreese
@@ -122,17 +141,19 @@ function draw() {
     pop();
   }
 
-  debugMode();
-
+  
+  
   //render the d20 with different triangles so that each one can display a different texture
-  stroke("black");
+  //scale up the d20
   scale(100);
   
-  //sets the texture mode to normal so that 
+  //sets the texture mode to normal so that it can display with u v coordinates
   textureMode(NORMAL);
   
   //initialize/reset the matrix for the 
   let tries = [];
+  
+  let sideI = 0;
    
   //for every vertex
   for (let i = 0; i < d20.vrt.length; i += 3) {
@@ -183,42 +204,43 @@ function draw() {
           if (draw){
           //if so, create a triangle that is a face of the icosahedron 
           //(The last 2 coordinates are uv coordinates (which are necessary for textures))
-             texture(d20.txtr);
+          //information on u v coordinates: https://stackoverflow.com/questions/3314219/how-do-u-v-coordinates-work
+             texture(d20.txtr[sideI]);
+            
+            
           beginShape(TRIANGLE_STRIP);
         
             
-          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 1, 1);
-        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0.5, 0);
-        vertex(d20.vrt[test2], d20.vrt[test2+1], d20.vrt[test2+2], 0, 1);
+          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 0.5, 0);
+        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0, 1);
+        vertex(d20.vrt[test2], d20.vrt[test2+1], d20.vrt[test2+2], 1, 1);
              
           tries.push(i);
           tries.push(test);
           tries.push(test2);
-            
+          
+          sideI++;
           endShape(CLOSE);
            
-if (!x){
+if (!log && DEBUG.DRAWLOG){
     console.log('face drawn!');
-  //console.log('v1:' + i + ' v2:' + test + ' v3:' + test2);
-  //console.log(tries);
+  console.log(sideI);
+  console.log('v1:' + i + ' v2:' + test + ' v3:' + test2);
+  console.log(tries);
   }         
-          }
-       
-        }
-        }
-      
-    }
-    }
-      
-    
-  }
-  if (!x){
+          }}}}}}
+  
+  
+  if (!log && DEBUG.DRAWLOG){
     console.log(tries);
   }
-  x = true;
+  
 
   pop();
   
-  //there for helping with debugging
-  orbitControl();
+  //there for helping with debugging textures etc
+  if (DEBUG.ORBIT){orbitControl();debugMode();}
+    
+  //for logging things to the console without repeating every draw loop
+  log = true;
 }
