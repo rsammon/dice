@@ -3,22 +3,24 @@ const DEBUG = {
   //have d20 rotate so that all sides can be seen
   ROT: false,
   //log rot values to console
-  ANGLELOG: false,
+  ANGLELOG: true,
   //display x, y, and z axes
-  AXIS: false,
+  AXIS: true,
   //log details when drawing faces of d20
   DRAWLOG: false,
   //orbit mode and debug mode
   //more info here: https://p5js.org/reference/#/p5/orbitControl
   //and here: https://p5js.org/reference/#/p5/debugMode
   ORBIT: true,
+  //rotate with the keyboard
+  ROTK: true,
 };
 
 let RATIO;
 
 //create a dice object template
 class dice {
-  constructor(ANGLE, SIDES) {
+  constructor(ANGLE, SIDES, FACES) {
     this.txtr = [];
     this.SIDES = SIDES;
     this.rotX = 0;
@@ -26,21 +28,22 @@ class dice {
     this.rotZ = 0;
     this.ANGLE = ANGLE;
     this.vrt = [];
+    this.faceRots = FACES;
   }
 }
 
 //initialize dice variables
 let d12 = new dice(0);
-let d20 = new dice(138.189685, 20);
+let d20 = new dice(138.189685, 20, [
+  0, -20.9051575, 0,
+0, 20.9051575, 0
+]);
 
 
-//load models for use
-function preload() {
-  
-  //obtained from here:
-  //https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg
-  //d20.txtr = loadImage("assets/cat.jpg");
-}
+
+
+
+
 
 function setup() {
   //create canvas w/ webgl so that 3d can be used
@@ -53,13 +56,20 @@ function setup() {
   for (let i = 0; i < d20.SIDES; i++){
     push();
     rectMode(CENTER);
-    d20.txtr[i]  = createGraphics(500, 500);
+    d20.txtr[i]  = createGraphics(512, 512);
+    
+    //draw the text
     d20.txtr[i].background('#19809b');
+
     d20.txtr[i].stroke('#9b3419');
     d20.txtr[i].textSize(30);
     d20.txtr[i].textFont("times-new-roman-bold-italic");
-    d20.txtr[i].text(i+1, d20.txtr[i].width/2, d20.txtr[i].height/2+40);
-    pop();
+    d20.txtr[i].text(i+1, d20.txtr[i].width/2, d20.txtr[i].height/2+50);
+    //draw a border with a traingle with a point at each uv coordinate
+        d20.txtr[i].noFill();
+    d20.txtr[i].triangle(d20.txtr[i].width*0.5, d20.txtr[i].height*0, d20.txtr[i].width*0, d20.txtr[i].height*1, d20.txtr[i].width*1, d20.txtr[i].height*1);
+    
+pop();
   }
 
   //assign the verticies of the d20
@@ -83,25 +93,27 @@ function setup() {
   
 }
 
+
+
+
+
+
 //for logging things to the console without repeating every loop
 let log = false;
 
 function draw() {
-  //translate(0, 0, 200);
-  //fill("red");
+  
 
-  
-  
-  
-  
-  
   background(230);
 
-  //change angle mode to degreese
+  //change angle mode to degrees
   angleMode(DEGREES);
 
   //draw the d20
   push();
+  
+  
+  
 
   //rotate down half of the exterior dihedral angle to the main face
   //rotateX(d20.ANGLE / 2);
@@ -115,9 +127,47 @@ function draw() {
     rotateZ(d20.rotZ);
     d20.rotZ += 1;
   }
+  
+  //change the rotation of the d20
+  if (DEBUG.ROTK && keyIsPressed) {
+    
+    switch(keyCode){
+        
+    case RIGHT_ARROW:
+        d20.rotY -= d20.ANGLE;
+      case LEFT_ARROW:
+        d20.rotY += d20.ANGLE;
+      case UP_ARROW:
+        d20.rotX -= d20.ANGLE;
+      case DOWN_ARROW:
+        d20.rotX += d20.ANGLE;
+
+    
+    }
+    
+    switch(key){
+        case '.':
+        d20.rotZ -= d20.ANGLE;
+      case ',':
+        d20.rotZ += d20.ANGLE;
+    }
+    
+  }
+  
+  
+  //d20.rotX = d20.ANGLE;
+  d20.rotY = -(180-d20.ANGLE)/2;
+  //d20.rotZ = 1*360/5;
+  
+  
+  
+  //update the rotation of the d20
+    rotateX(d20.rotX);
+    rotateY(d20.rotY);
+    rotateZ(d20.rotZ);
 
   //log the rot angle measures to the console
-  if (DEBUG.ANGLELOG) {
+  if (DEBUG.ANGLELOG && key == 'p' && keyIsPressed) {
     console.log(d20.rotX + ", " + d20.rotY + ", " + d20.rotZ);
   }
 
@@ -211,8 +261,8 @@ function draw() {
           beginShape(TRIANGLE_STRIP);
         
             
-          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 0.5, 0);
-        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0, 1);
+          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 0, 1);
+        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0.5, 0);
         vertex(d20.vrt[test2], d20.vrt[test2+1], d20.vrt[test2+2], 1, 1);
              
           tries.push(i);
