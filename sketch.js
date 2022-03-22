@@ -11,14 +11,30 @@ const DEBUG = {
   //orbit mode and debug mode
   //more info here: https://p5js.org/reference/#/p5/orbitControl
   //and here: https://p5js.org/reference/#/p5/debugMode
-  ORBIT: true,
+  ORBIT: false,
+  //rotate with the keyboard
+  ROTK: false,
 };
 
 let RATIO;
 
+//variable to store face to roll to
+var roll = undefined;
+//speed to roll at (how many turns per total angle)
+const ROLLSPEED = 150;
+
+//variable for color picker
+let diceColor;
+//variable for font size
+let fontSize;
+//variable for font color
+let fontColor;
+//button for updating changes to the dices attributes
+let editButton;
+
 //create a dice object template
 class dice {
-  constructor(ANGLE, SIDES) {
+  constructor(ANGLE, SIDES, FACES) {
     this.txtr = [];
     this.SIDES = SIDES;
     this.rotX = 0;
@@ -26,40 +42,82 @@ class dice {
     this.rotZ = 0;
     this.ANGLE = ANGLE;
     this.vrt = [];
+    this.faceRots = FACES;
   }
 }
 
 //initialize dice variables
 let d12 = new dice(0);
-let d20 = new dice(138.189685, 20);
+let d20 = new dice(138.189685, 20, [
+  0, -20.9051575, 0, //1 angles
+0, 20.9051575, 0, //2 angles
+  41.810315, 0, 0, //3 angles
+  41.810315, -41.810315, 0, //4 angles
+  41.810315, 41.810315, 0, //5 angles
+  146.3361025, 106.83194875, 125.43094500000001, //6 angles
+  125.43094500000001, 159.0948425, 125.43094500000001, //7 angles
+  196.50848050000002, 117.2845275, 125.43094500000001, //8 angles
+  188.1464175, -20.9051575, 188.1464175, // 9 angles
+  177.69383875, 20.9051575, 188.1464175, //10 angles
+  229.95673250000002, -62.715472500000004, 146.3361025, //11 angles
+  229.95673250000002, -41.810315, 188.1464175, //12 angles
+  229.95673250000002, -41.810315, 104.5257875, //13 angles
+  -292.672205, -146.3361025, 167.24126, //14 angles
+  -334.48252, -125.43094500000001, 83.62063, //15 angles
+  -334.48252, -125.43094500000001, 167.24126, //16 angles
+  -271.7670475, -125.43094500000001, 83.62063, //17 angles
+  -271.7670475, -334.48252, 292.672205, //18 angles
+  -271.7670475, 418.10315, -250.86189000000002, //19 angles
+  -355.3876775, -83.62063, 167.24126 //20 angles
+]);
 
 
-//load models for use
-function preload() {
-  
-  //obtained from here:
-  //https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg
-  //d20.txtr = loadImage("assets/cat.jpg");
-}
+
+
+
+
 
 function setup() {
   //create canvas w/ webgl so that 3d can be used
-  createCanvas(500, 500, WEBGL);
+  createCanvas(500, 700, WEBGL);
   RATIO = (1 + sqrt(5)) / 2;
   
+  
+  //COLOR MANIPULATION
+  //variables
+  //color picker for dice
+  diceColor = createColorPicker('#19809b');
+  //color picker for font
+  fontColor = createColorPicker('#000000');
+  //font size slider
+  fontSize = createSlider(15, 75, 30, 0.5);
+  //create edit button
+  editButton = createButton('change!');
+  
+  
+  
+  
+  //2D DRAWING!
   //create different graphics for each side with different numbers
   //some more information about this code
   //https://p5js.org/reference/#/p5/createGraphics
   for (let i = 0; i < d20.SIDES; i++){
     push();
     rectMode(CENTER);
-    d20.txtr[i]  = createGraphics(500, 500);
-    d20.txtr[i].background('#19809b');
-    d20.txtr[i].stroke('#9b3419');
-    d20.txtr[i].textSize(30);
+    d20.txtr[i]  = createGraphics(512, 512);
+    
+    //draw the text
+    d20.txtr[i].background(diceColor.color());
+
+    d20.txtr[i].stroke(fontColor.color());
+    d20.txtr[i].textSize(fontSize.value());
     d20.txtr[i].textFont("times-new-roman-bold-italic");
-    d20.txtr[i].text(i+1, d20.txtr[i].width/2, d20.txtr[i].height/2+40);
-    pop();
+    d20.txtr[i].text(i+1, d20.txtr[i].width/2, d20.txtr[i].height/2+50);
+    //draw a border with a traingle with a point at each uv coordinate
+        d20.txtr[i].noFill();
+    d20.txtr[i].triangle(d20.txtr[i].width*0.5, d20.txtr[i].height*0, d20.txtr[i].width*0, d20.txtr[i].height*1, d20.txtr[i].width*1, d20.txtr[i].height*1);
+    
+pop();
   }
 
   //assign the verticies of the d20
@@ -83,25 +141,55 @@ function setup() {
   
 }
 
+
+
+
+
+
 //for logging things to the console without repeating every loop
 let log = false;
 
 function draw() {
-  //translate(0, 0, 200);
-  //fill("red");
+  
+  
+  
+  //2D DRAWING
+  //update textures for the dice
+  editButton.mousePressed(function updateTextures(){
+      for (let i = 0; i < d20.SIDES; i++){
+    push();
+    rectMode(CENTER);
+    //draw the text
+    d20.txtr[i].background(diceColor.color());
 
+    d20.txtr[i].stroke(fontColor.color());
+    d20.txtr[i].textSize(fontSize.value());
+    d20.txtr[i].textFont("times-new-roman-bold-italic");
+    d20.txtr[i].text(i+1, d20.txtr[i].width/2, d20.txtr[i].height/2+50);
+    //draw a border with a traingle with a point at each uv coordinate
+        d20.txtr[i].noFill();
+    d20.txtr[i].triangle(d20.txtr[i].width*0.5, d20.txtr[i].height*0, d20.txtr[i].width*0, d20.txtr[i].height*1, d20.txtr[i].width*1, d20.txtr[i].height*1);
   
+    pop();
+    }
+  })
   
-  
-  
-  
+
   background(230);
 
-  //change angle mode to degreese
+  
+  //change angle mode to degrees
   angleMode(DEGREES);
 
+  
+  
+  //3D DRAWING
   //draw the d20
   push();
+  
+  translate(0, -100, 0);
+  
+  
 
   //rotate down half of the exterior dihedral angle to the main face
   //rotateX(d20.ANGLE / 2);
@@ -115,9 +203,38 @@ function draw() {
     rotateZ(d20.rotZ);
     d20.rotZ += 1;
   }
+  
+  //change the rotation of the d20
+  if (DEBUG.ROTK && keyIsPressed) {
+    
+    switch(keyCode){
+        
+    case RIGHT_ARROW:
+        d20.rotY -= d20.ANGLE;
+      case LEFT_ARROW:
+        d20.rotY += d20.ANGLE;
+      case UP_ARROW:
+        d20.rotX -= d20.ANGLE;
+      case DOWN_ARROW:
+        d20.rotX += d20.ANGLE;
+
+    
+    }
+    
+    switch(key){
+        case '.':
+        d20.rotZ -= d20.ANGLE;
+      case ',':
+        d20.rotZ += d20.ANGLE;
+    }
+    
+  }
+  
+  
+  
 
   //log the rot angle measures to the console
-  if (DEBUG.ANGLELOG) {
+  if (DEBUG.ANGLELOG && key == 'p' && keyIsPressed) {
     console.log(d20.rotX + ", " + d20.rotY + ", " + d20.rotZ);
   }
 
@@ -140,7 +257,38 @@ function draw() {
 
     pop();
   }
-
+  
+  
+  //rolling the dice
+  //if the roll variable has been updated
+  if (!(roll==undefined) ){
+    
+    //spin ROLLSPEED times to equal the variable for the side
+    if (abs(d20.rotX) < abs(d20.faceRots[(roll-1)*3]) ){
+      d20.rotX+=d20.faceRots[(roll-1)*3]/ROLLSPEED;
+    }
+    if (abs(d20.rotY) < abs(d20.faceRots[(roll-1)*3+1]) ){
+      d20.rotY+=d20.faceRots[(roll-1)*3+1]/ROLLSPEED;
+    }
+    if (abs(d20.rotZ) < abs(d20.faceRots[(roll-1)*3+2]) ){
+      d20.rotZ+=d20.faceRots[(roll-1)*3+2]/ROLLSPEED;
+    }
+    
+  }
+  
+  if (!roll){
+    push();
+    textSize(100);
+    textFont('Helvetica');
+    text('hello!', 50, 50);
+    pop();
+  }
+  
+  
+  //update the rotation of the d20
+    rotateX(d20.rotX);
+    rotateY(d20.rotY);
+    rotateZ(d20.rotZ);
   
   
   //render the d20 with different triangles so that each one can display a different texture
@@ -211,8 +359,8 @@ function draw() {
           beginShape(TRIANGLE_STRIP);
         
             
-          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 0.5, 0);
-        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0, 1);
+          vertex(d20.vrt[i], d20.vrt[i+1], d20.vrt[i+2], 0, 1);
+        vertex(d20.vrt[test], d20.vrt[test+1], d20.vrt[test+2], 0.5, 0);
         vertex(d20.vrt[test2], d20.vrt[test2+1], d20.vrt[test2+2], 1, 1);
              
           tries.push(i);
@@ -244,3 +392,18 @@ if (!log && DEBUG.DRAWLOG){
   //for logging things to the console without repeating every draw loop
   log = true;
 }
+
+//check if r is pressed for rolling the dice
+function keyPressed(){
+    if (key == 'r'){
+      d20.rotX = 0;
+      d20.rotY = 0;
+      d20.rotZ = 0;
+      roll = floor(random(1, 21));
+      console.log(roll);
+      console.log(d20.faceRots[(roll-1)*3]);
+       console.log(d20.faceRots[(roll-1)*3+1]);
+       console.log(d20.faceRots[(roll-1)*3+2]);
+      
+    }
+  }
