@@ -23,12 +23,15 @@ var roll = undefined;
 //speed to roll at (how many turns per total angle)
 const ROLLSPEED = 150;
 
-//variable for color picker
+//variable for color picker & label
 let diceColor;
-//variable for font size
+let diceColorLabel;
+//variable for font size & label
 let fontSize;
+let fontSizeLabel;
 //variable for font color
 let fontColor;
+let fontColorLabel;
 //button for updating changes to the dices attributes
 let editButton;
 
@@ -72,7 +75,8 @@ let d20 = new dice(138.189685, 20, [
 ]);
 
 
-
+//output text
+let otxt;
 
 
 
@@ -83,18 +87,22 @@ function setup() {
   RATIO = (1 + sqrt(5)) / 2;
   
   
-  //COLOR MANIPULATION
+
   //variables
   //color picker for dice
   diceColor = createColorPicker('#19809b');
+  diceColorLabel = createElement('p', 'dice color');
   //color picker for font
   fontColor = createColorPicker('#000000');
+  fontColorLabel = createElement('p', 'font color');
   //font size slider
   fontSize = createSlider(15, 75, 30, 0.5);
+  fontSizeLabel = createElement('p', 'font size');
   //create edit button
   editButton = createButton('change!');
   
-  
+  //output text
+  otxt = createElement('h3', "press 'r' to roll dice!");
   
   
   //2D DRAWING!
@@ -177,6 +185,20 @@ function draw() {
 
   background(230);
 
+  //position the inputs & labels on the canvas  
+  diceColor.position(50, 500);
+  diceColorLabel.position(50, 460);
+  
+  fontColor.position(50, 550);
+  fontColorLabel.position(50, 510);
+  
+  fontSize.position(50, 600);
+  fontSizeLabel.position(50, 560);
+  
+  editButton.position(50, 650);
+  
+  //position the output text on the canvas
+  otxt.position(width/2-75, height/2+100);
   
   //change angle mode to degrees
   angleMode(DEGREES);
@@ -273,16 +295,15 @@ function draw() {
     if (abs(d20.rotZ) < abs(d20.faceRots[(roll-1)*3+2]) ){
       d20.rotZ+=d20.faceRots[(roll-1)*3+2]/ROLLSPEED;
     }
-    
+    //change the help text once the dice is done rolling
+    if( abs(d20.rotX) >= abs(d20.faceRots[(roll-1)*3]) 
+       && abs(d20.rotY) >= abs(d20.faceRots[(roll-1)*3+1])
+       && abs(d20.rotZ) >= abs(d20.faceRots[(roll-1)*3+2])
+      ){
+      otxt.html('dice roll: ' + roll);
+    }
   }
   
-  if (!roll){
-    push();
-    textSize(100);
-    textFont('Helvetica');
-    text('hello!', 50, 50);
-    pop();
-  }
   
   
   //update the rotation of the d20
@@ -400,10 +421,6 @@ function keyPressed(){
       d20.rotY = 0;
       d20.rotZ = 0;
       roll = floor(random(1, 21));
-      console.log(roll);
-      console.log(d20.faceRots[(roll-1)*3]);
-       console.log(d20.faceRots[(roll-1)*3+1]);
-       console.log(d20.faceRots[(roll-1)*3+2]);
       
     }
   }
